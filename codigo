@@ -1,0 +1,45 @@
+// Estas constantes definen los valores necesarios para las lecturas del LDR y el convertidor analógico a digital (ADC)
+#define LDR_PIN                   A0
+#define MAX_ADC_READING           1023
+#define ADC_REF_VOLTAGE           5.0
+#define REF_RESISTANCE            220 
+#define LUX_CALC_SCALAR           12518931
+#define LUX_CALC_EXPONENT         -1.405
+
+void setup(void) 
+{
+  Serial.begin(9600);
+  Serial.println(F("Prueba del Sensor de Luz")); 
+  Serial.println("");
+}
+
+void loop(void) 
+{  
+  int   ldrRawData;
+  float resistorVoltage, ldrVoltage;
+  float ldrResistance;
+  float ldrLux;
+  
+  // Realizar la conversión analógica a digital  
+  ldrRawData = analogRead(LDR_PIN);
+  
+  // CONVERSIÓN DE VOLTAJE DEL RESISTOR
+  // Convertir los datos digitales crudos a voltaje que se midió en el pin analógico
+  resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
+
+  // El voltaje a través del LDR es la alimentación de 5V menos el voltaje del resistor de 200
+  ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
+  
+  // CONVERSIÓN DE RESISTENCIA DEL LDR
+  // Resistencia que el LDR tendría para ese voltaje  
+  ldrResistance = ldrVoltage/resistorVoltage * REF_RESISTANCE;
+  
+  // CONVERTIDOR LDR_LUX
+  ldrLux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
+ 
+  // Imprimir los resultados
+  Serial.print("Iluminancia del LDR: "); 
+  Serial.print(ldrLux); 
+  Serial.println(" lux");
+  delay(250);
+}
